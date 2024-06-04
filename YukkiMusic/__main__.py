@@ -2,7 +2,7 @@ import asyncio
 import importlib
 import sys
 import ntplib
-from time import ctime
+from time import ctime, sleep
 
 from pyrogram import idle
 from pytgcalls.exceptions import NoActiveGroupCall
@@ -22,6 +22,7 @@ async def sync_time():
         response = client.request('pool.ntp.org')
         system_time = ctime(response.tx_time)
         print(f"System time synchronized to: {system_time}")
+        sleep(5)  # Adding a delay to ensure time synchronization
     except Exception as e:
         LOGGER("YukkiMusic").error(f"Failed to synchronize time: {e}")
         sys.exit()
