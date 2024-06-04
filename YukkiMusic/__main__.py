@@ -1,15 +1,8 @@
-#
-# Copyright (C) 2021-2022 by TeamYukki@Github, < https://github.com/TeamYukki >.
-#
-# This file is part of < https://github.com/TeamYukki/YukkiMusicBot > project,
-# and is released under the "GNU v3.0 License Agreement".
-# Please see < https://github.com/TeamYukki/YukkiMusicBot/blob/master/LICENSE >
-#
-# All rights reserved.
-
 import asyncio
 import importlib
 import sys
+import ntplib
+from time import ctime
 
 from pyrogram import idle
 from pytgcalls.exceptions import NoActiveGroupCall
@@ -23,8 +16,19 @@ from YukkiMusic.utils.database import get_banned_users, get_gbanned
 
 loop = asyncio.get_event_loop()
 
+async def sync_time():
+    client = ntplib.NTPClient()
+    try:
+        response = client.request('pool.ntp.org')
+        system_time = ctime(response.tx_time)
+        print(f"System time synchronized to: {system_time}")
+    except Exception as e:
+        LOGGER("YukkiMusic").error(f"Failed to synchronize time: {e}")
+        sys.exit()
 
 async def init():
+    await sync_time()
+    
     if (
         not config.STRING1
         and not config.STRING2
@@ -54,8 +58,8 @@ async def init():
         pass
     await app.start()
     for all_module in ALL_MODULES:
-        importlib.import_module("YukkiMusic.plugins" + all_module)
-    LOGGER("Yukkimusic.plugins").info(
+        importlib.import_module("YukkiMusic.plugins." + all_module)
+    LOGGER("YukkiMusic.plugins").info(
         "Successfully Imported Modules "
     )
     await userbot.start()
@@ -74,7 +78,6 @@ async def init():
     await Yukki.decorators()
     LOGGER("YukkiMusic").info("Yukki Music Bot Started Successfully")
     await idle()
-
 
 if __name__ == "__main__":
     loop.run_until_complete(init())
